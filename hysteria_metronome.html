@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muse Hysteria Metronome - 93 BPM</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #e60012;
+        }
+        .bpm {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #00ffcc;
+        }
+        button {
+            background: #e60012;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #ff3333;
+        }
+        .start { background: #00cc66; }
+        .start:hover { background: #00ff88; }
+        .visual {
+            width: 120px;
+            height: 120px;
+            margin: 30px auto;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            transition: all 0.1s;
+        }
+        .beat {
+            background: #ffcc00;
+            transform: scale(1.15);
+            box-shadow: 0 0 30px #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Muse - Hysteria</h1>
+        <p>Metronome at 93 BPM</p>
+        
+        <div class="bpm">93</div>
+        
+        <div class="visual" id="visual">♪</div>
+        
+        <button id="startBtn" class="start">START METRONOME</button>
+        <button id="stopBtn">STOP</button>
+        
+        <p style="margin-top: 40px; font-size: 14px; opacity: 0.7;">
+            Perfect tempo for learning <strong>Hysteria</strong><br>
+            Double-time feel is ~186 BPM
+        </p>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let intervalId = null;
+        const bpm = 93;
+        const intervalMs = (60 / bpm) * 1000;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playClick() {
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+            
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.05);
+            
+            // Visual flash
+            const visual = document.getElementById('visual');
+            visual.classList.add('beat');
+            setTimeout(() => {
+                visual.classList.remove('beat');
+            }, 80);
+        }
+        
+        function startMetronome() {
+            if (isRunning) return;
+            isRunning = true;
+            document.getElementById('startBtn').textContent = 'RUNNING...';
+            
+            playClick(); // immediate first click
+            
+            intervalId = setInterval(() => {
+                playClick();
+            }, intervalMs);
+        }
+        
+        function stopMetronome() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(intervalId);
+            document.getElementById('startBtn').textContent = 'START METRONOME';
+        }
+        
+        // Button listeners
+        document.getElementById('startBtn').addEventListener('click', startMetronome);
+        document.getElementById('stopBtn').addEventListener('click', stopMetronome);
+        
+        // Keyboard support (Space to start/stop)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isRunning) {
+                    stopMetronome();
+                } else {
+                    startMetronome();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
