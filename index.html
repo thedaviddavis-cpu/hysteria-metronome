@@ -21,24 +21,24 @@
         }
         
         .container {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.65);
             padding: 40px 60px;
             border-radius: 20px;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
         h1 {
             color: #e60012;
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
             font-size: 2.8em;
             text-shadow: 0 0 20px #e60012;
         }
 
         .bpm {
-            font-size: 90px;
+            font-size: 85px;
             font-weight: bold;
-            margin: 15px 0;
+            margin: 10px 0 25px 0;
             color: #00ffcc;
             text-shadow: 0 0 30px #00ffcc;
         }
@@ -46,7 +46,7 @@
         .visual {
             width: 140px;
             height: 140px;
-            margin: 30px auto;
+            margin: 20px auto 30px;
             border-radius: 50%;
             background: rgba(255, 204, 0, 0.15);
             display: flex;
@@ -54,33 +54,39 @@
             justify-content: center;
             font-size: 60px;
             transition: all 0.1s ease;
-            border: 3px solid rgba(255, 204, 0, 0.4);
+            border: 3px solid rgba(255, 204, 0, 0.5);
         }
 
         .beat {
             background: #ffcc00 !important;
-            transform: scale(1.25);
-            box-shadow: 0 0 50px #ffcc00;
+            transform: scale(1.3);
+            box-shadow: 0 0 60px #ffcc00;
             color: black;
         }
 
-        button {
-            background: #e60012;
-            color: white;
-            border: none;
-            padding: 16px 45px;
-            font-size: 18px;
-            border-radius: 50px;
+        /* Dom Button */
+        .dom-btn {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: url('dom.jpg') center/cover;
+            border: 5px solid #e60012;
             cursor: pointer;
-            margin: 10px;
-            font-weight: bold;
+            margin: 15px;
+            box-shadow: 0 0 25px rgba(230, 0, 18, 0.6);
+            transition: all 0.2s;
         }
 
-        .start {
-            background: #00cc66;
+        .dom-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 40px rgba(230, 0, 18, 0.9);
         }
-        
-        .start:hover { background: #00ff88; }
+
+        .dom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .start { border-color: #00cc66; box-shadow: 0 0 25px rgba(0, 204, 102, 0.6); }
     </style>
 </head>
 <body>
@@ -90,8 +96,8 @@
         <div class="bpm">93 BPM</div>
         <div class="visual" id="visual">♪</div>
         
-        <button id="startBtn" class="start">START METRONOME</button>
-        <button id="stopBtn">STOP</button>
+        <button id="startBtn" class="dom-btn start"></button>
+        <button id="stopBtn" class="dom-btn" style="background: url('dom.jpg') center/cover; border-color: #666;"></button>
     </div>
 
     <script>
@@ -105,23 +111,23 @@
             const oscillator = audioContext.createOscillator();
             const gain = audioContext.createGain();
             oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
-            gain.gain.setValueAtTime(0.4, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.06);
+            oscillator.frequency.setValueAtTime(1250, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.45, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.07);
             oscillator.connect(gain);
             gain.connect(audioContext.destination);
             oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.06);
+            oscillator.stop(audioContext.currentTime + 0.07);
             
             const visual = document.getElementById('visual');
             visual.classList.add('beat');
-            setTimeout(() => visual.classList.remove('beat'), 100);
+            setTimeout(() => visual.classList.remove('beat'), 110);
         }
         
         document.getElementById('startBtn').addEventListener('click', () => {
             if (isRunning) return;
             isRunning = true;
-            document.getElementById('startBtn').textContent = 'RUNNING...';
+            document.getElementById('startBtn').style.borderColor = '#00cc66';
             playClick();
             intervalId = setInterval(playClick, intervalMs);
         });
@@ -129,15 +135,13 @@
         document.getElementById('stopBtn').addEventListener('click', () => {
             isRunning = false;
             clearInterval(intervalId);
-            document.getElementById('startBtn').textContent = 'START METRONOME';
+            document.getElementById('startBtn').style.borderColor = '#e60012';
         });
         
-        // Spacebar toggle
         document.addEventListener('keydown', e => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                const btn = isRunning ? 'stopBtn' : 'startBtn';
-                document.getElementById(btn).click();
+                document.getElementById(isRunning ? 'stopBtn' : 'startBtn').click();
             }
         });
     </script>
