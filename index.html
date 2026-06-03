@@ -3,101 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hysteria - 93 BPM Metronome</title>
+    <title>Hysteria - 93 BPM</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
             height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), 
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), 
                         url('hysteria.png') center/cover no-repeat fixed;
-            color: #fff;
-            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
             overflow: hidden;
         }
-        
-        .container {
-            background: rgba(0, 0, 0, 0.65);
-            padding: 40px 60px;
+
+        .metronome-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px 50px;
             border-radius: 20px;
-            backdrop-filter: blur(10px);
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 200, 0.3);
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        h1 {
-            color: #e60012;
-            margin: 0 0 8px 0;
-            font-size: 2.8em;
-            text-shadow: 0 0 20px #e60012;
+        .muse {
+            color: #ff0033;
+            font-size: 2.2em;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px #ff0033;
+        }
+
+        .hysteria {
+            font-size: 1.1em;
+            margin: 8px 0 20px 0;
+            letter-spacing: 3px;
         }
 
         .bpm {
-            font-size: 85px;
+            font-size: 4.5em;
             font-weight: bold;
-            margin: 10px 0 25px 0;
             color: #00ffcc;
-            text-shadow: 0 0 30px #00ffcc;
+            text-shadow: 0 0 25px #00ffcc;
+            margin: 15px 0;
         }
 
         .visual {
-            width: 140px;
-            height: 140px;
-            margin: 20px auto 30px;
+            width: 90px;
+            height: 90px;
+            margin: 20px auto;
             border-radius: 50%;
-            background: rgba(255, 204, 0, 0.15);
+            background: #111;
+            border: 4px solid #ffcc00;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
-            transition: all 0.1s ease;
-            border: 3px solid rgba(255, 204, 0, 0.5);
+            font-size: 40px;
+            transition: all 0.1s;
         }
 
         .beat {
             background: #ffcc00 !important;
-            transform: scale(1.3);
-            box-shadow: 0 0 60px #ffcc00;
             color: black;
+            transform: scale(1.15);
+            box-shadow: 0 0 40px #ffcc00;
         }
 
-        /* Dom Button */
-        .dom-btn {
-            width: 110px;
-            height: 110px;
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
-            background: url('dom.jpg') center/cover;
-            border: 5px solid #e60012;
             cursor: pointer;
-            margin: 15px;
-            box-shadow: 0 0 25px rgba(230, 0, 18, 0.6);
+            border: 5px solid;
             transition: all 0.2s;
         }
 
-        .dom-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 40px rgba(230, 0, 18, 0.9);
+        .start-btn {
+            border-color: #ff0033;
+            background: url('Dom.jpg') center/cover;
         }
 
-        .dom-btn:active {
-            transform: scale(0.95);
+        .stop-btn {
+            border-color: #888;
+            background: url('Dom.jpg') center/cover;
+            opacity: 0.7;
         }
 
-        .start { border-color: #00cc66; box-shadow: 0 0 25px rgba(0, 204, 102, 0.6); }
+        .start-btn:hover { border-color: #00ff88; transform: scale(1.1); }
+        .stop-btn:hover { border-color: #ccc; transform: scale(1.1); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>MUSE</h1>
-        <h2>HYSTERIA</h2>
+    <div class="metronome-card">
+        <div class="muse">MUSE</div>
+        <div class="hysteria">HYSTERIA</div>
         <div class="bpm">93 BPM</div>
+        
         <div class="visual" id="visual">♪</div>
         
-        <button id="startBtn" class="dom-btn start"></button>
-        <button id="stopBtn" class="dom-btn" style="background: url('dom.jpg') center/cover; border-color: #666;"></button>
+        <div class="buttons">
+            <div id="startBtn" class="btn start-btn"></div>
+            <div id="stopBtn" class="btn stop-btn"></div>
+        </div>
     </div>
 
     <script>
@@ -106,38 +122,36 @@
         const bpm = 93;
         const intervalMs = (60 / bpm) * 1000;
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         function playClick() {
-            const oscillator = audioContext.createOscillator();
+            const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(1250, audioContext.currentTime);
-            gain.gain.setValueAtTime(0.45, audioContext.currentTime);
+            osc.type = 'square';
+            osc.frequency.value = 1250;
+            gain.gain.value = 0.45;
             gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.07);
-            oscillator.connect(gain);
+            osc.connect(gain);
             gain.connect(audioContext.destination);
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.07);
-            
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.07);
+
             const visual = document.getElementById('visual');
             visual.classList.add('beat');
-            setTimeout(() => visual.classList.remove('beat'), 110);
+            setTimeout(() => visual.classList.remove('beat'), 120);
         }
-        
+
         document.getElementById('startBtn').addEventListener('click', () => {
             if (isRunning) return;
             isRunning = true;
-            document.getElementById('startBtn').style.borderColor = '#00cc66';
             playClick();
             intervalId = setInterval(playClick, intervalMs);
         });
-        
+
         document.getElementById('stopBtn').addEventListener('click', () => {
             isRunning = false;
             clearInterval(intervalId);
-            document.getElementById('startBtn').style.borderColor = '#e60012';
         });
-        
+
         document.addEventListener('keydown', e => {
             if (e.code === 'Space') {
                 e.preventDefault();
